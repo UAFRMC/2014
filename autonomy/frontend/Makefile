@@ -1,57 +1,32 @@
-# Standalone makefile for C++ OpenGL program
+COMPILER=g++
 
-OPTS=-O3
+DIRS=-I/usr/local/include -L/usr/local/lib -I../include
 
-# Linux libraries: you probably want freeglut (dev package) for "-lglut"
-SYSLIBS= -L/usr/local/lib -L/usr/X11R6/lib \
-	-lglut -lGLU -lGL -lpthread -lm
+SOIL_DIR=../include/SOIL
+SOIL=$(SOIL_DIR)/stb_image_aug.c $(SOIL_DIR)/SOIL.c
 
-# Some older Linux machines need way more libraries:
-#SYSLIBS= -L/usr/local/lib -L/usr/X11R6/lib \
-#	-lglut -lGLU -lGL  -lXxf86vm  -lXmu -lX11 -lXext -lXi -ldl -lpthread -lm
+ifeq ($(OS),Windows_NT)
+	LIBS+=-lWs2_32
+	#ADD LIBS FOR GL/GLUT on windows...
+else
+	LIB+=-lpthread
 
-# For MacOS X, use this set of libraries instead:
-# SYSLIBS= -framework GLUT -framework OpenGL -lobjc 
+	ifeq ($(shell uname),Darwin)
+		LIB+=-framework OpenGL -framework GLUT -framework IOKit -framework CoreFoundation
+	else
+		LIB+=-lGL -lGLU -lglut
+	endif
+endif
 
-# Compiler and flags
-CCC=g++
-CC=gcc
-INC=../include
-CFLAGS=-I$(INC) -Wall $(OPTS)
+CFLAGS=-O -Wall -Wno-deprecated-declarations -Wno-char-subscripts
 
-# Program pieces
-DEST=frontend
-OBJS=main.o
+all: frontend
 
-all: $(DEST)
+frontend: main.cpp $(SOIL)
+	$(COMPILER) $^ $(LIB) $(CFLAGS) $(DIRS) -o $@
 
-# Build main from object files
-$(DEST): $(OBJS)
-	$(CCC) $(CFLAGS) $(OBJS) $(SYSLIBS) -o $(DEST)
+frontend_msl: main.cpp $(SOIL)
+	$(COMPILER) $^ $(LIB) $(CFLAGS) $(DIRS) -o $@ -D MSL -std=c++11
 
 clean:
-	-rm $(OBJS) $(DEST)
-
-# Trick gmake into compiling .cpp into .o
-o=o
-OUTFLAG=-o
-%.$o: %.cpp 
-	$(CCC) $(CFLAGS) -c $< $(OUTFLAG)$@
-
-%.$o: %.C
-	$(CCC) $(CFLAGS) -c $< $(OUTFLAG)$@
-
-%.$o: %.c
-	$(CC) $(CFLAGS) -c $< $(OUTFLAG)$@
-
-# Trick other makes into compiling .cpp's into .o's.
-.SUFFIXES: .cpp .C .c
-
-.cpp.$o:
-	$(CCC) $(CFLAGS) -c $< $(OUTFLAG)$@
-
-.C.$o:
-	$(CCC) $(CFLAGS) -c $< $(OUTFLAG)$@
-
-.c.$o:
-	$(CC) $(CFLAGS) -c $< $(OUTFLAG)$@
+	rm -f frontend frontend.exe frontend_msl frontend_msl.exe

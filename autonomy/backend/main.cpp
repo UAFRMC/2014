@@ -14,7 +14,7 @@
 #include "aurora/ui.h"
 #include "aurora/robot_serial.h"
 
-#include "SOIL/SOIL.h"
+#include <SOIL/SOIL.h>
 
 #include "ogl/event.cpp"
 #include "osl/socket.cpp"
@@ -826,7 +826,7 @@ void display(void) {
 
 int main(int argc,char *argv[]) 
 {
-	setenv("DISPLAY", ":0",1);
+	// setenv("DISPLAY", ":0",1);
 	glutInit(&argc,argv);
 	
 	// Set screen size

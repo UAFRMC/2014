@@ -4,7 +4,7 @@ OPTS=-O3
 
 # Linux libraries: you probably want freeglut (dev package) for "-lglut"
 SYSLIBS= -L/usr/local/lib -L/usr/X11R6/lib \
-	-lSOIL -lglut -lGLU -lGL -lpthread -lm
+	-lglut -lGLU -lGL -lpthread -lm
 
 # Some older Linux machines need way more libraries:
 #SYSLIBS= -L/usr/local/lib -L/usr/X11R6/lib \
@@ -19,6 +19,10 @@ CC=gcc
 INC=../include
 CFLAGS=-I$(INC) -Wall $(OPTS)
 
+SOIL_DIR=../include/SOIL
+SOIL=$(SOIL_DIR)/stb_image_aug.c $(SOIL_DIR)/SOIL.c
+
+
 # Program pieces
 DEST=backend
 OBJS=main.o
@@ -26,8 +30,8 @@ OBJS=main.o
 all: $(DEST)
 
 # Build main from object files
-$(DEST): $(OBJS)
-	$(CCC) $(CFLAGS) $(OBJS) $(SYSLIBS) -o $(DEST)
+$(DEST): $(OBJS) $(SOIL)
+	$(CCC) $(CFLAGS) $(OBJS) $(SYSLIBS) $(SOIL) -o $(DEST)
 
 clean:
 	-rm $(OBJS) $(DEST)
